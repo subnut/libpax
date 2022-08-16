@@ -1,1 +1,3 @@
 .POSIX:
+clean:
+bin:

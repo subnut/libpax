@@ -1,11 +1,14 @@
 .POSIX:
+.SUFFIXES:
+.SUFFIXES: .c .o
 .c.o: ; $(CC) $(CFLAGS:  = ) -c $<
 
-ARFLAGS	= -rcs
 NAME	= pax
+ARFLAGS	= -rcs
 
-EXENAME	= $(NAME)
-LIBNAME	= lib$(NAME)
-
-# NOTE: These CFLAGS aren't POSIX-compatible
+# NOTE: These aren't POSIX-compatible
 CFLAGS	= -fPIC -Wall -Wpedantic
+
+# NOTE: Changing these will break things
+LIBNAME	= lib$(NAME)
+EXENAME	= $(NAME)

@@ -1,24 +1,22 @@
 .POSIX:
-.SUFFIXES:
-.SUFFIXES: .c .o
-.c.o: ; @$(CC) $(CFLAGS) -c $< $(LDFLAGS)
+.SILENT: clean test tests
+include ../config.mk
+
+TESTS = octal
+
 all: test
+test: $(TESTS)
+	echo $(TESTS) | tr ' ' '\n' | sh
+	rm -f *.o $(TESTS)
 
-clean: ; @rm -f *.o test
-test: tests
-	@tests
-	@rm -f tests *.o
-
-CFLAGS	= -Wall -Wpedantic -Wno-unused-variable
-LDFLAGS	= -L../lib -lpax -lrt -lm
-
+CFLAGS	= -Wall -Wpedantic -Wno-unused-variable	# NOTE: POSIX-incompatible
+LDFLAGS	= -L.. -l$(NAME) -lrt -lm		# NOTE: -l$(LIBNAME) won't work
 CURL	= curl -L
-TESTS	= test_octal
 
-tests: $(TESTS:=.o)
-tests: minunit.h
-tests: test.o test.h
-tests: ; @$(CC) $(CFLAGS) -o $@ test.o $(TESTS:=.o) $(LDFLAGS)
+.SUFFIXES:
+.SUFFIXES: .c
+.c: minunit.h
+	@$(CC) $(CFLAGS:  = ) -o $@ $< $(LDFLAGS:  = )
 
 MINUNIT_REF = b15ad0ae28f1a7a43881ea17defb0a4367d9582d
 MINUNIT_URL = https://github.com/siu/minunit/raw/$(MINUNIT_REF)/minunit.h
