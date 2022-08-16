@@ -56,7 +56,7 @@ un_octal(const uint8_t *str, size_t len)
  * In case of other errors, sets errno and returns NULL.
  */
 uint8_t *
-to_octal(const uint64_t integer, uint8_t *buffer, size_t buflen) {
+to_octal(uint64_t integer, uint8_t *buffer, size_t buflen) {
 	size_t len = 0;
 	while (integer >> len)
 		len++;
