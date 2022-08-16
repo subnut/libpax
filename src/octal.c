@@ -3,10 +3,12 @@
 #include "octal.h"
 
 #include <errno.h>
+#include <stdlib.h>
 #include "extras.h"
 
 /*
- * errno.h	- EINVAL, EOVERFLOW
+ * errno.h	- errno, EINVAL, EOVERFLOW
+ * stdlib.h	- calloc
  * extras.h	- not
  */
 
@@ -42,4 +44,34 @@ un_octal(const uint8_t *str, size_t len)
 		result = (result << 3) | (str[i] - '0');
 
 	return result;
+}
+
+/*
+ * Returns a pointer to *buffer containing the octal form of integer.
+ *
+ * If *buffer is set to NULL, then it allocates a buffer of suitable size,
+ * which needs to be freed by the caller.
+ *
+ * If given buffer is too small, it sets errno = EOVERFLOW and returns NULL.
+ * In case of other errors, sets errno and returns NULL.
+ */
+uint8_t *
+to_octal(const uint64_t integer, uint8_t *buffer, size_t buflen) {
+	size_t len = 0;
+	while (integer >> len)
+		len++;
+	len++;	// For the trailing NUL
+
+	if (buflen < len && buffer != NULL)
+		return errno = EOVERFLOW,
+		       NULL;
+	if (buffer == NULL)
+		if ((buffer = calloc(len, sizeof(uint8_t))) == NULL)
+			return NULL;
+
+	buffer[--len] = '\0';
+	for (; len; integer >>= 3)
+		buffer[--len] = '0' + (07 & integer);
+
+	return buffer;
 }
