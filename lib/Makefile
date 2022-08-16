@@ -15,7 +15,7 @@ $(LIBNAME).a: $(OBJS)
 $(LIBNAME).so: $(OBJS)
 $(LIBNAME).dylib: $(OBJS)
 
-$(LIBNAME).a: ; $(AR) $(ARFLAGS) $@ $(OBJS)
+$(LIBNAME).a: ; $(AR) $(ARFLAGS) $@ $?
 $(LIBNAME).so: ;  $(CC) $(CFLAGS) -shared -o $@ $(OBJS) $(LDFLAGS)
 $(LIBNAME).dylib: ;  $(CC) $(CFLAGS) -shared -dynamiclib -o $@ $(OBJS) $(LDFLAGS)
 
