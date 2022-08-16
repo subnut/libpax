@@ -1,0 +1,10 @@
+Tests use minunit[1].
+Download minunit.h[2] and place it in this directory.
+If minunit.h is not found, make downloads it automatically using curl[3].
+
+To run tests, execute -
+	make tests
+
+[1]: https://github.com/siu/minunit
+[2]: https://github.com/siu/minunit/raw/master/minunit.h
+[3]: https://curl.se
