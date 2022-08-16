@@ -2,12 +2,10 @@
 .SILENT: clean test tests
 include ../config.mk
 
-TESTS = octal
-
 all: test
-test: $(TESTS)
-	echo $(TESTS) | tr ' ' '\n' | sh
-	rm -f *.o $(TESTS)
+test: 0main
+	0main
+	rm -f 0main *.o
 
 CFLAGS	= -Wall -Wpedantic -Wno-unused-variable	# NOTE: POSIX-incompatible
 LDFLAGS	= -L.. -l$(NAME) -lrt -lm		# NOTE: -l$(LIBNAME) won't work
