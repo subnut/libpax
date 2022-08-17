@@ -1,9 +1,8 @@
 .POSIX:
-.SILENT: bin clean test
+.SILENT: test
 include config.mk
 
 CP = ln -f
-MK = $(MAKE) -s $(MAKEFLAGS)
 
 posix: bin lib
 linux: posix solib
@@ -13,11 +12,14 @@ bin: ; cd bin && $(MK) $@ && $(CP) $(EXENAME) ..
 test: lib ; cd test && $(MK) $@
 lib: alib
 
-alib solib: ; @cd lib && $(MK) $@ && $(CP) $(LIBNAME).$(@:lib=) ..
-dylib:      ; @cd lib && $(MK) $@ && $(CP) $(LIBNAME).$@ ..
+alib:  $(LIBNAME).a
+solib: $(LIBNAME).so
+dylib: $(LIBNAME).dylib
+
+$(LIBNAME).a $(LIBNAME).so $(LIBNAME).dylib :
+	cd lib && $(MK) $@ && $(CP) $@ ..
 
 clean:
-	rm -f $(EXENAME)
-	rm -f $(LIBNAME).*
-	cd bin && $(MAKE) $(MAKEFLAGS) -s clean
-	cd lib && $(MAKE) $(MAKEFLAGS) -s clean
+	rm -f $(EXENAME) $(LIBNAME).*
+	cd bin && $(MK) clean
+	cd lib && $(MK) clean
