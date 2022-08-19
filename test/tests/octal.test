@@ -1,0 +1,18 @@
+#include "lib/octal.h"
+#include "test/testing.h"
+
+#include <string.h>
+
+/*
+ * string.h	- strcmp
+ */
+
+TEST(to_octal);
+
+TESTSUITE(octal) {
+	RUN_TEST(to_octal);
+}
+
+TEST(to_octal) {
+	ASSERT((!strcmp("0", (char *)to_octal(1, NULL, 0))));
+}
