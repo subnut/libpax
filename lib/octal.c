@@ -4,11 +4,13 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include "extras.h"
 
 /*
  * errno.h	- errno, EINVAL, EOVERFLOW
  * stdlib.h	- calloc
+ * string.h	- memset
  * extras.h	- not
  */
 
@@ -56,12 +58,15 @@ un_octal(const uint8_t *str, size_t len)
  * In case of other errors, sets errno and returns NULL.
  */
 uint8_t *
-to_octal(uint64_t integer, uint8_t *buffer, size_t buflen) {
-	size_t len = 0;
+to_octal(uint64_t integer, uint8_t *buffer, size_t buflen, bool nul) {
+	/* Calculate required buffer length */
+	size_t len = 1;	// NOTE: If 0, then to_octal(0) won't work.
 	while (integer >> len)
 		len++;
-	len++;	// For the trailing NUL
+	if (nul)
+		len++; // For the trailing NUL
 
+	/* Check if buffer is of enough length */
 	if (buflen < len && buffer != NULL)
 		return errno = EOVERFLOW,
 		       NULL;
@@ -69,9 +74,16 @@ to_octal(uint64_t integer, uint8_t *buffer, size_t buflen) {
 		if ((buffer = calloc(len, sizeof(uint8_t))) == NULL)
 			return NULL;
 
-	buffer[--len] = '\0';
-	for (; len; integer >>= 3)
-		buffer[--len] = '0' + (07 & integer);
+	/* Initialize buffer */
+	memset(buffer, '0', buflen);
 
+	/* Octalize */
+	uint8_t *bufptr = buffer + (buflen - len);
+	if (nul)
+		bufptr[--len] = '\0';
+	for (; len; integer >>= 3)
+		bufptr[--len] = '0' + (07 & integer);
+
+	/* Return */
 	return buffer;
 }
