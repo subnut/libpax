@@ -6,12 +6,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <sys/stat.h>
 
 /*
  * cpio.h	- MAGIC
  * stdio.h	- FILE
  * stdbool.h	- bool
  * stdint.h	- uint8_t
+ * sys/stat.h	- struct stat
  */
 
 #define TRAILER \
@@ -72,17 +74,21 @@ void	free_cpio_record(struct cpio_record *);
 
 /* Read */
 int	cpio_read_record(FILE *, struct cpio_record *); // TODO
-int	cpio_read_entry (FILE *, struct cpio_entry  *); // TODO
+int	cpio_read_entry(FILE *, struct cpio_entry *); // TODO
 
 /* Write */
 int	cpio_write_trailer(FILE *);
 int	cpio_write_record(const struct cpio_record *, FILE *);
-int	cpio_write_entry (const struct cpio_entry  *, FILE *, size_t);
+int	cpio_write_entry(const struct cpio_entry *, FILE *, size_t);
+int	cpio_write_file(const char *, FILE *, size_t); // TODO: TESTME
 
 /* Helpers */
-int	cpio_record_set_filename(struct cpio_record *restrict, const char *restrict);
 void	cpio_header_to_record(const struct cpio_header *restrict, struct cpio_record *restrict);
 void	cpio_header_from_record(struct cpio_header *restrict, const struct cpio_record *restrict);
 bool	cpio_header_isvalid(const struct cpio_header *); // TODO
+
+/* Setters */
+int	cpio_record_set_filename(struct cpio_record *, const char *);
+int	cpio_record_set_stat(struct cpio_record *, const struct stat *); // TODO
 
 #endif /* CPIO_H */

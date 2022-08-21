@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include "errno.h"
 
 /*
@@ -17,6 +18,7 @@
  * stdlib.h	- calloc, free
  * string.h	- strncpy
  * errno.h	- ERETURN
+ * sys/stat.h	- lstat, struct stat
  */
 
 #include "errno.h"
@@ -63,8 +65,33 @@ int
 cpio_write_trailer(FILE *fp)
 {
 	struct cpio_record rec = {0};
-	cpio_record_set_filename(&rec, TRAILER);
+	if (cpio_record_set_filename(&rec, TRAILER) == -1) return -1;
 	return cpio_write_record(&rec, fp);
+}
+
+int
+cpio_write_file(const char *fname, FILE *fp, size_t iobufsz)
+{
+	if (fname == NULL || fp == NULL)
+		ERETURN(E_NULL);
+
+	FILE *file;
+	if ((file = fopen(fname, "r")) == NULL)
+		return -1;
+
+	struct stat stat = {0};
+	if (lstat(fname, &stat) == -1)
+		return -1;
+
+	struct cpio_record rec = {0};
+	struct cpio_entry ent = {
+		.rec = &rec,
+		.fp = file,
+	};
+
+	if (cpio_record_set_stat(&rec, &stat) == -1) return -1;
+	if (cpio_record_set_filename(&rec, TRAILER) == -1) return -1;
+	return cpio_write_entry(&ent, fp, iobufsz);
 }
 
 int
@@ -89,6 +116,9 @@ fail:	funlockfile(fp); return -1;
 int
 cpio_write_entry(const struct cpio_entry *ent, FILE *fp, size_t iobufsz)
 {
+	if (iobufsz < 1)
+		ERETURN(EINVAL);
+
 	if (fp == NULL || ent == NULL || ent->rec == NULL
 			|| ent->rec->filesize > 0 && ent->fp == NULL)
 		ERETURN(E_NULL);
