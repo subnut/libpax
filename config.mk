@@ -2,6 +2,7 @@
 .SUFFIXES:
 .SUFFIXES: .c .o
 .c.o: ; $(CC) $(CFLAGS:  = ) -c $<
+.c:   ; $(CC) $(CFLAGS:  = ) -o $@ $< $(LDFLAGS:  = )
 
 NAME	= pax
 ARFLAGS	= -rcs
