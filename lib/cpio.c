@@ -120,7 +120,7 @@ cpio_write_entry(const struct cpio_entry *ent, FILE *fp, size_t iobufsz)
 		ERETURN(EINVAL);
 
 	if (fp == NULL || ent == NULL || ent->rec == NULL
-			|| ent->rec->filesize > 0 && ent->fp == NULL)
+			|| (ent->rec->filesize > 0 && ent->fp == NULL))
 		ERETURN(E_NULL);
 
 	flockfile(fp);
