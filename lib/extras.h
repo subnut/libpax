@@ -1,18 +1,46 @@
+#define _POSIX_C_SOURCE 200809L
 #ifndef EXTRAS_H
 #define EXTRAS_H
 
 #define not(cond) \
 	(!(cond))
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "errno.h"
+
 #define free(ptr) \
 	do { free(ptr); ptr = NULL; } while (0)
 
 static inline
-int ctoi(char c) {
-	return (c >= '0' && c <= '9')
-		? c - '0'
-		: -1
-		;
+int fcopy(FILE *restrict in, FILE *restrict out, size_t length, size_t bufsz) {
+	char *buf = NULL;
+	size_t copied = 0;
+	if (in == NULL || out == NULL)
+		ERETURN(E_NULL);
+	if (length < 0 || bufsz <= 0)
+		ERETURN(EINVAL);
+	if ((buf = calloc(bufsz, sizeof(char))) == NULL)
+		return -1;
+	if (length == 0)
+		return 0;
+	flockfile(in);
+	flockfile(out);
+	size_t rem, chunks;
+	while ((rem = length - copied) > 0) {
+		chunks = rem > bufsz ? bufsz : rem;
+		memset(buf, 0, bufsz * sizeof(char));
+		if (fread(buf, sizeof(char), chunks, in) != chunks) goto fail;
+		if (fwrite(buf, sizeof(char), chunks, out) != chunks) goto fail;
+	}
+	funlockfile(out);
+	funlockfile(in);
+	return 0;
+fail:
+	funlockfile(out);
+	funlockfile(in);
+	return -1;
 }
 
 #endif /* EXTRAS_H */

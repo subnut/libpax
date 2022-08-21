@@ -77,7 +77,7 @@ int	cpio_read_entry (FILE *, struct cpio_entry  *); // TODO
 /* Write */
 int	cpio_write_trailer(FILE *);
 int	cpio_write_record(const struct cpio_record *, FILE *);
-int	cpio_write_entry (const struct cpio_entry  *, FILE *); // TODO
+int	cpio_write_entry (const struct cpio_entry  *, FILE *, size_t);
 
 /* Helpers */
 int	cpio_record_set_filename(struct cpio_record *restrict, const char *restrict);

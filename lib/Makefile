@@ -23,6 +23,7 @@ errno.o: errno.h
 octal.o: octal.h
 
 # Additional dependencies
+extras.h: errno.h
 cpio.o: errno.o
 cpio.o: octal.o
 cpio.o: extras.h

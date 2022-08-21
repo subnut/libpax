@@ -76,16 +76,28 @@ cpio_write_record(const struct cpio_record *rec, FILE *fp)
 	struct cpio_header header;
 	cpio_header_from_record(&header, rec);
 
-#define WRITE(ptr, size, nmemb) \
-	if (fwrite(ptr, size, nmemb, fp) < nmemb) return -1
 	flockfile(fp);
+#define WRITE(ptr, size, nmemb) \
+	if (fwrite(ptr, size, nmemb, fp) < nmemb) goto fail
 	WRITE(&header, sizeof(header), 1);
 	WRITE(rec->filename, sizeof(rec->filename[0]), rec->namesize);
-	/* WRITE(rec->c_data, sizeof(rec->c_data[0]), rec->meta.filesize); */
-	funlockfile(fp);
 #undef WRITE
+	funlockfile(fp); return 0;
+fail:	funlockfile(fp); return -1;
+}
 
-	return 0;
+int
+cpio_write_entry(const struct cpio_entry *ent, FILE *fp, size_t iobufsz)
+{
+	if (fp == NULL || ent == NULL || ent->rec == NULL
+			|| ent->rec->filesize > 0 && ent->fp == NULL)
+		ERETURN(E_NULL);
+
+	flockfile(fp);
+	if (cpio_write_record(ent->rec, fp) == -1) goto fail;
+	if (fcopy(ent->fp, fp, ent->rec->filesize, iobufsz) == -1) goto fail;
+	funlockfile(fp); return 0;
+fail:	funlockfile(fp); return -1;
 }
 
 int
