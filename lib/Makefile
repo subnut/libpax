@@ -3,7 +3,7 @@ include ../config.mk
 lib: alib
 clean: ; rm -f *.o $(LIBNAME).*
 
-OBJS = cpio.o octal.o
+OBJS = cpio.o errno.o octal.o
 
 alib: $(LIBNAME).a
 solib: $(LIBNAME).so
@@ -19,7 +19,12 @@ $(LIBNAME).dylib: ;  $(CC) $(CFLAGS) -shared -dynamiclib -o $@ $(OBJS) $(LDFLAGS
 
 # Every .c depends upon its .h
 cpio.o: cpio.h
+errno.o: errno.h
 octal.o: octal.h
 
 # Additional dependencies
-cpio.o: octal.o octal.h
+cpio.o: errno.o
+cpio.o: octal.o
+cpio.o: extras.h
+octal.o: errno.o
+octal.o: extras.h

@@ -20,7 +20,7 @@ libpax_perror(const char *msg)
 	flockfile(stderr);
 	if (msg != NULL && msg[0] != '\0')
 		fprintf(stderr, "%s: ", msg);
-	fputs(libpax_strerror(errno), stderr);
+	fprintf(stderr, "%s\n", libpax_strerror(errno));
 	fflush(stderr);
 	funlockfile(stderr);
 }
@@ -29,5 +29,5 @@ const char *
 libpax_strerror(int errnum)
 {
 	if (errnum > -1) return strerror(errnum);
-	else             return errno_desc[-errnum];
+	else             return errno_desc[errnum - E__MAX];
 }
