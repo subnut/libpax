@@ -8,7 +8,7 @@ test: 0main ; 0main ; rm -f 0main *.o
 ../$(LIBNAME).a: ; @cd .. && $(MK) -s lib
 
 CFLAGS	= -Wall -Wpedantic -Wno-unused-variable	# NOTE: POSIX-incompatible
-LDFLAGS	= -L.. -l$(NAME) -lrt -lm		# NOTE: -l$(LIBNAME) won't work
+LDFLAGS	= -lrt -lm -L.. -l$(LIB)
 CURL	= curl -L
 
 .SUFFIXES:

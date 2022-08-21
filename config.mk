@@ -1,18 +1,20 @@
 .POSIX:
 .SUFFIXES:
 .SUFFIXES: .c .o
-.c.o: ; $(CC) $(CFLAGS:  = ) -c $<
-.c:   ; $(CC) $(CFLAGS:  = ) -o $@ $< $(LDFLAGS:  = )
+.c.o: ; $(CC) $(CFLAGS:  = ) -c $< $(IFLAGS:  = )
+.c:   ; $(CC) $(CFLAGS:  = ) -o $@ $< $(IFLAGS:  = ) $(LDFLAGS:  = )
 
 NAME	= pax
 ARFLAGS	= -rcs
+IFLAGS	=
+
+EXE	= $(NAME)
+LIB	= $(NAME)
+LIBNAME	= lib$(LIB)
 
 # NOTE: These aren't POSIX-compatible
 CFLAGS	= -fPIC -Wall -Wpedantic
-
-# NOTE: Changing these will break things
-LIBNAME	= lib$(NAME)
-EXENAME	= $(NAME)
+CP	= cp -r
 
 # Command aliases
 MK	= $(MAKE) MAKEFLAGS="$(MAKEFLAGS)"

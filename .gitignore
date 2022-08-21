@@ -1,3 +1,11 @@
+*
+!*/
+!*.*
+![Mm]akefile
+!GNUmakefile
+!LICENSE
+!README
+
 **/*.o
 **/*.a
 **/*.so
