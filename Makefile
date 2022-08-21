@@ -17,9 +17,12 @@ solib: $(LIBNAME).so
 dylib: $(LIBNAME).dylib
 
 $(LIBNAME).a $(LIBNAME).so $(LIBNAME).dylib :
-	cd lib && $(MK) $@ && $(CP) $@ ..
+	@echo "cd lib && $(MAKE) $@ && $(CP) $@ .."
+	@cd lib && $(MK) $@ && $(CP) $@ ..
 
 clean:
 	rm -f $(EXENAME) $(LIBNAME).*
-	cd bin && $(MK) clean
-	cd lib && $(MK) clean
+	@echo "cd bin && $(MAKE) $@"
+	@cd bin && $(MK) clean
+	@echo "cd lib && $(MAKE) $@"
+	@cd lib && $(MK) clean
