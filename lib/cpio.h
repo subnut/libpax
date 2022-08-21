@@ -49,7 +49,7 @@ int	cpio_write_trailer(FILE *);
 int	cpio_write_record(const struct cpio_record *, FILE *);
 void	cpio_header_to_metadata(const struct cpio_header *restrict, struct cpio_metadata *restrict);
 void	cpio_metadata_to_header(const struct cpio_metadata *restrict, struct cpio_header *restrict);
-void	cpio_record_set_filename(struct cpio_record *restrict, const char *restrict);
+int	cpio_record_set_filename(struct cpio_record *restrict, const char *restrict);
 
 struct cpio_header *new_cpio_header(void);
 struct cpio_record *new_cpio_record(void);

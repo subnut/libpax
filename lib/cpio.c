@@ -60,11 +60,29 @@ cpio_metadata_to_header(const struct cpio_metadata *restrict meta, struct cpio_h
 	memcpy(head->c_magic, MAGIC, sizeof(head->c_magic));
 }
 
-void
+int
 cpio_record_set_filename(struct cpio_record *restrict rec, const char *restrict name)
 {
-	rec->c_filename = (uint8_t *)strdup(name);
-	rec->meta.namesize = strlen(name) + 1;	// +1 for the NUL byte
+	char *dup;
+	size_t len;
+
+	if (rec == NULL || name == NULL)
+		return (errno = E_NULL),
+		       -1;
+
+	if ((len = strlen(name) + 1) > 0777777)	// +1 for the NUL byte
+		return (errno = EOVERFLOW),
+		       -1;
+
+	if ((dup = strdup(name)) == NULL)
+		return -1;	// errno already set by strdup
+
+	if (rec->filename != NULL)
+		free(rec->filename);
+
+	rec->filename = dup;
+	rec->namesize = len;
+	return 0;
 }
 
 int
