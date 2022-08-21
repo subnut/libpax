@@ -14,13 +14,6 @@ static const char *errno_desc[] = {
 	/* E_NAME */	"Name contains invalid character",
 };
 
-const char *
-libpax_strerror(int errno)
-{
-	if (errno > -1) return strerror(errno);
-	else            return errno_desc[-errno];
-}
-
 void
 libpax_perror(const char *msg)
 {
@@ -30,4 +23,11 @@ libpax_perror(const char *msg)
 	fputs(libpax_strerror(errno), stderr);
 	fflush(stderr);
 	funlockfile(stderr);
+}
+
+const char *
+libpax_strerror(int errnum)
+{
+	if (errnum > -1) return strerror(errnum);
+	else             return errno_desc[-errnum];
 }

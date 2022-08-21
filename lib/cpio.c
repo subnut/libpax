@@ -67,41 +67,25 @@ cpio_write_trailer(FILE *fp)
 	return cpio_write_record(&rec, fp);
 }
 
-void
-cpio_header_to_record(const struct cpio_header *restrict head, struct cpio_record *restrict rec)
+int
+cpio_write_record(const struct cpio_record *rec, FILE *fp)
 {
-#define COPY(param) \
-	rec->param = un_octal(head->c_##param, sizeof(head->c_##param))
-	COPY(dev);
-	COPY(ino);
-	COPY(mode);
-	COPY(uid);
-	COPY(gid);
-	COPY(nlink);
-	COPY(rdev);
-	COPY(mtime);
-	COPY(namesize);
-	COPY(filesize);
-#undef COPY
-}
+	if (rec == NULL || fp == NULL)
+		ERETURN(E_NULL);
 
-void
-cpio_header_from_record(struct cpio_header *restrict head, const struct cpio_record *restrict rec)
-{
-#define COPY(param) \
-	to_octal(rec->param, head->c_##param, sizeof(head->c_##param), false)
-	COPY(dev);
-	COPY(ino);
-	COPY(mode);
-	COPY(uid);
-	COPY(gid);
-	COPY(nlink);
-	COPY(rdev);
-	COPY(mtime);
-	COPY(namesize);
-	COPY(filesize);
-#undef COPY
-	memcpy(head->c_magic, MAGIC, sizeof(head->c_magic));
+	struct cpio_header header;
+	cpio_header_from_record(&header, rec);
+
+#define WRITE(ptr, size, nmemb) \
+	if (fwrite(ptr, size, nmemb, fp) < nmemb) return -1
+	flockfile(fp);
+	WRITE(&header, sizeof(header), 1);
+	WRITE(rec->filename, sizeof(rec->filename[0]), rec->namesize);
+	/* WRITE(rec->c_data, sizeof(rec->c_data[0]), rec->meta.filesize); */
+	funlockfile(fp);
+#undef WRITE
+
+	return 0;
 }
 
 int
@@ -141,23 +125,39 @@ cpio_record_set_filename(struct cpio_record *restrict rec, const char *restrict 
 	return 0;
 }
 
-int
-cpio_write_record(const struct cpio_record *rec, FILE *fp)
+void
+cpio_header_to_record(const struct cpio_header *restrict head, struct cpio_record *restrict rec)
 {
-	if (rec == NULL || fp == NULL)
-		ERETURN(E_NULL);
+#define COPY(param) \
+	rec->param = un_octal(head->c_##param, sizeof(head->c_##param))
+	COPY(dev);
+	COPY(ino);
+	COPY(mode);
+	COPY(uid);
+	COPY(gid);
+	COPY(nlink);
+	COPY(rdev);
+	COPY(mtime);
+	COPY(namesize);
+	COPY(filesize);
+#undef COPY
+}
 
-	struct cpio_header header;
-	cpio_header_from_record(&header, rec);
-
-#define WRITE(ptr, size, nmemb) \
-	if (fwrite(ptr, size, nmemb, fp) < nmemb) return -1
-	flockfile(fp);
-	WRITE(&header, sizeof(header), 1);
-	WRITE(rec->filename, sizeof(rec->filename[0]), rec->namesize);
-	/* WRITE(rec->c_data, sizeof(rec->c_data[0]), rec->meta.filesize); */
-	funlockfile(fp);
-#undef WRITE
-
-	return 0;
+void
+cpio_header_from_record(struct cpio_header *restrict head, const struct cpio_record *restrict rec)
+{
+#define COPY(param) \
+	to_octal(rec->param, head->c_##param, sizeof(head->c_##param), false)
+	COPY(dev);
+	COPY(ino);
+	COPY(mode);
+	COPY(uid);
+	COPY(gid);
+	COPY(nlink);
+	COPY(rdev);
+	COPY(mtime);
+	COPY(namesize);
+	COPY(filesize);
+#undef COPY
+	memcpy(head->c_magic, MAGIC, sizeof(head->c_magic));
 }
