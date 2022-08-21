@@ -1,16 +1,17 @@
-/* Needed for errno.h values other than EDOM/EILSEQ/ERANGE */
 #define _POSIX_C_SOURCE 200809L
 #include "octal.h"
 
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include "errno.h"
 #include "extras.h"
 
 /*
  * errno.h	- errno, EINVAL, EOVERFLOW
  * stdlib.h	- calloc
  * string.h	- memset
+ * errno.h	- ERETURN
  * extras.h	- not
  */
 
@@ -26,16 +27,16 @@ is_octal(const uint8_t *s, size_t n)
 
 /*
  * Returns the non-negative integer value of the octal number stored in *str.
- * In case of error, sets errno and returns the negative of errno.
+ * In case of any error, sets errno appropriately and returns -1.
  * NOTE: *str must be no longer than 21 digits.
  */
 int64_t
 un_octal(const uint8_t *str, size_t len)
 {
 	if (len > 21)
-		return -(errno = EOVERFLOW);
+		ERETURN(EOVERFLOW);
 	if not(is_octal(str, len))
-		return -(errno = EINVAL);
+		ERETURN(EINVAL);
 
 	/* Trim extra zeroes from the left */
 	while (*str == '0')
