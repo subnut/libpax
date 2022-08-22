@@ -35,6 +35,7 @@ int fcopy(FILE *restrict in, FILE *restrict out, size_t length, size_t bufsz) {
 		memset(buf, 0, bufsz * sizeof(char));
 		if (fread(buf, sizeof(char), chunks, in) != chunks) goto fail;
 		if (fwrite(buf, sizeof(char), chunks, out) != chunks) goto fail;
+		copied += chunks;
 	}
 exit:	funlockfile(out);
 	funlockfile(in);

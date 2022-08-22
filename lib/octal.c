@@ -62,7 +62,7 @@ uint8_t *
 to_octal(uint64_t integer, uint8_t *buffer, size_t buflen, bool nul) {
 	/* Calculate required buffer length */
 	size_t len = 1;	// NOTE: If 0, then to_octal(0) won't work.
-	while (integer >> len)
+	while (integer >> len * 3)
 		len++;
 	if (nul)
 		len++; // For the trailing NUL

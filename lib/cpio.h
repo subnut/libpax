@@ -76,15 +76,15 @@ int	cpio_read_entry(FILE *, struct cpio_entry *); // TODO
 int	cpio_write_trailer(FILE *);
 int	cpio_write_record(const struct cpio_record *, FILE *);
 int	cpio_write_entry(const struct cpio_entry *, FILE *, size_t);
-int	cpio_write_file(const char *, FILE *, size_t); // TODO: TESTME
+int	cpio_write_file(const char *, FILE *, size_t);
 
 /* Helpers */
-void	cpio_header_to_record(const struct cpio_header *restrict, struct cpio_record *restrict);
-void	cpio_header_from_record(struct cpio_header *restrict, const struct cpio_record *restrict);
+int	cpio_header_to_record(const struct cpio_header *restrict, struct cpio_record *restrict);
+int	cpio_header_from_record(struct cpio_header *restrict, const struct cpio_record *restrict);
 bool	cpio_header_isvalid(const struct cpio_header *); // TODO
 
 /* Setters */
 int	cpio_record_set_filename(struct cpio_record *, const char *);
-int	cpio_record_set_stat(struct cpio_record *, const struct stat *); // TODO
+void	cpio_record_set_stat(struct cpio_record *, const struct stat *);
 
 #endif /* CPIO_H */

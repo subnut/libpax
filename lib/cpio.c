@@ -74,7 +74,7 @@ cpio_write_file(const char *fname, FILE *fp, size_t iobufsz)
 		.fp = file,
 	};
 
-	if (cpio_record_set_stat(&rec, &stat) == -1) goto fail;
+	cpio_record_set_stat(&rec, &stat);
 	if (cpio_record_set_filename(&rec, fname) == -1) goto fail;
 	if (cpio_write_entry(&ent, fp, iobufsz) == -1) goto fail;
 
@@ -95,7 +95,8 @@ cpio_write_record(const struct cpio_record *rec, FILE *fp)
 		ERETURN(E_NULL);
 
 	struct cpio_header header;
-	cpio_header_from_record(&header, rec);
+	if (cpio_header_from_record(&header, rec) == -1)
+		return -1;
 
 	flockfile(fp);
 #define WRITE(ptr, size, nmemb) \
@@ -153,11 +154,12 @@ cpio_record_set_filename(struct cpio_record *rec, const char *name)
 	return 0;
 }
 
-void
+int
 cpio_header_to_record(const struct cpio_header *restrict head, struct cpio_record *restrict rec)
 {
 #define COPY(param) \
-	rec->param = un_octal(head->c_##param, sizeof(head->c_##param))
+	rec->param = un_octal(head->c_##param, sizeof(head->c_##param)); \
+	if (rec->param == -1) return -1
 	COPY(dev);
 	COPY(ino);
 	COPY(mode);
@@ -169,13 +171,15 @@ cpio_header_to_record(const struct cpio_header *restrict head, struct cpio_recor
 	COPY(namesize);
 	COPY(filesize);
 #undef COPY
+	return 0;
 }
 
-void
+int
 cpio_header_from_record(struct cpio_header *restrict head, const struct cpio_record *restrict rec)
 {
 #define COPY(param) \
-	to_octal(rec->param, head->c_##param, sizeof(head->c_##param), false)
+	to_octal(rec->param, head->c_##param, sizeof(head->c_##param), false); \
+	if (head->c_##param == NULL) return -1
 	COPY(dev);
 	COPY(ino);
 	COPY(mode);
@@ -188,4 +192,22 @@ cpio_header_from_record(struct cpio_header *restrict head, const struct cpio_rec
 	COPY(filesize);
 #undef COPY
 	memcpy(head->c_magic, MAGIC, sizeof(head->c_magic));
+	return 0;
+}
+
+void
+cpio_record_set_stat(struct cpio_record *rec, const struct stat *stat)
+{
+#define COPY(param) \
+	rec->param = stat->st_##param
+	COPY(dev);
+	COPY(ino);
+	COPY(mode);
+	COPY(uid);
+	COPY(gid);
+	COPY(nlink);
+	COPY(rdev);
+#undef COPY
+	rec->mtime = stat->st_mtim.tv_sec;
+	rec->filesize = stat->st_size;
 }
