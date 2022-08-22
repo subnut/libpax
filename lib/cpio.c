@@ -41,24 +41,7 @@ new_cpio_record(void)
 	struct cpio_record *data = calloc(sizeof(struct cpio_record), 1);
 	if (data == NULL) return data;
 	memset(data, 0, sizeof(struct cpio_record));
-	data->filename = NULL;
 	return data;
-}
-
-void
-free_cpio_header(struct cpio_header *data)
-{
-	if (data == NULL) return;
-	free(data);
-}
-
-void
-free_cpio_record(struct cpio_record *data)
-{
-	if (data == NULL) return;
-	if (data->filename != NULL)
-		free(data->filename);
-	free(data);
 }
 
 int
@@ -79,9 +62,11 @@ cpio_write_file(const char *fname, FILE *fp, size_t iobufsz)
 	if ((file = fopen(fname, "r")) == NULL)
 		return -1;
 
+	int rc = 0;
+
 	struct stat stat = {0};
 	if (lstat(fname, &stat) == -1)
-		return -1;
+		goto fail;
 
 	struct cpio_record rec = {0};
 	struct cpio_entry ent = {
@@ -89,9 +74,18 @@ cpio_write_file(const char *fname, FILE *fp, size_t iobufsz)
 		.fp = file,
 	};
 
-	if (cpio_record_set_stat(&rec, &stat) == -1) return -1;
-	if (cpio_record_set_filename(&rec, TRAILER) == -1) return -1;
-	return cpio_write_entry(&ent, fp, iobufsz);
+	if (cpio_record_set_stat(&rec, &stat) == -1) goto fail;
+	if (cpio_record_set_filename(&rec, fname) == -1) goto fail;
+	if (cpio_write_entry(&ent, fp, iobufsz) == -1) goto fail;
+
+	int saved_errno;
+exit:	saved_errno = errno;
+	fclose(file);
+	errno = saved_errno;
+	return rc;
+
+fail:	rc = -1;
+	goto exit;
 }
 
 int
@@ -131,14 +125,12 @@ fail:	funlockfile(fp); return -1;
 }
 
 int
-cpio_record_set_filename(struct cpio_record *restrict rec, const char *restrict name)
+cpio_record_set_filename(struct cpio_record *rec, const char *name)
 {
-	char *dup;
-	size_t len;
-
 	if (rec == NULL || name == NULL)
 		ERETURN(E_NULL);
 
+	size_t len;
 	if ((len = strlen(name) + 1) > 0777777)	// +1 for the NUL byte
 		ERETURN(EOVERFLOW);
 
@@ -156,14 +148,8 @@ cpio_record_set_filename(struct cpio_record *restrict rec, const char *restrict 
 		if (name[i] >> 7)
 			ERETURN(E_NAME);
 
-	if ((dup = strdup(name)) == NULL)
-		return -1;	// errno already set by strdup
-
-	if (rec->filename != NULL)
-		free(rec->filename);
-
 	rec->namesize = len;
-	rec->filename = dup;
+	memcpy(rec->filename, name, len);
 	return 0;
 }
 

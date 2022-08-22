@@ -43,7 +43,7 @@ struct cpio_record {
 	uint64_t  mtime;
 	uint32_t  namesize;	// includes the trailing NUL
 	uint64_t  filesize;
-	char     *filename;	// includes the trailing NUL
+	char      filename[0777777];
 	/*
 	 * NOTE: char is okay because POSIX.1-2017 mandates CHAR_BIT = 8
 	 * See limits.h
@@ -67,10 +67,6 @@ struct cpio_entry {
 /* Create */
 struct cpio_header *new_cpio_header(void);
 struct cpio_record *new_cpio_record(void);
-
-/* Destroy */
-void	free_cpio_header(struct cpio_header *);
-void	free_cpio_record(struct cpio_record *);
 
 /* Read */
 int	cpio_read_record(FILE *, struct cpio_record *); // TODO

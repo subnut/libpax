@@ -21,10 +21,12 @@ int fcopy(FILE *restrict in, FILE *restrict out, size_t length, size_t bufsz) {
 		ERETURN(E_NULL);
 	if (length < 0 || bufsz <= 0)
 		ERETURN(EINVAL);
-	if ((buf = calloc(bufsz, sizeof(char))) == NULL)
-		return -1;
 	if (length == 0)
 		return 0;
+	if ((buf = calloc(bufsz, sizeof(char))) == NULL)
+		return -1;
+
+	int rc = 0;
 	flockfile(in);
 	flockfile(out);
 	size_t rem, chunks;
@@ -34,13 +36,13 @@ int fcopy(FILE *restrict in, FILE *restrict out, size_t length, size_t bufsz) {
 		if (fread(buf, sizeof(char), chunks, in) != chunks) goto fail;
 		if (fwrite(buf, sizeof(char), chunks, out) != chunks) goto fail;
 	}
-	funlockfile(out);
+exit:	funlockfile(out);
 	funlockfile(in);
-	return 0;
-fail:
-	funlockfile(out);
-	funlockfile(in);
-	return -1;
+	free(buf);
+	return rc;
+
+fail:	rc = -1;
+	goto exit;
 }
 
 #endif /* EXTRAS_H */
