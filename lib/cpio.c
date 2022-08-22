@@ -132,35 +132,6 @@ fail:	funlockfile(fp); return -1;
 }
 
 int
-cpio_record_set_filename(struct cpio_record *rec, const char *name)
-{
-	if (rec == NULL || name == NULL)
-		ERETURN(E_NULL);
-
-	size_t len;
-	if ((len = strlen(name) + 1) > 0777777)	// +1 for the NUL byte
-		ERETURN(EOVERFLOW);
-
-	/*
-	 * POSIX-1.2017 says -
-	 *
-	 * 	All characters shall be represented in the ISO/IEC 646:1991 standard
-	 * 	IRV. For maximum portability between implementations, names should be
-	 * 	selected from characters represented by the portable filename character
-	 * 	set as octets with the most significant bit zero.
-	 *
-	 * So, we reject any names with the MSB set.
-	 */
-	for (int i = 0; i < strlen(name); i++)
-		if (name[i] >> 7)
-			ERETURN(E_NAME);
-
-	rec->namesize = len;
-	memcpy(rec->filename, name, len);
-	return 0;
-}
-
-int
 cpio_header_to_record(const struct cpio_header *restrict head, struct cpio_record *restrict rec)
 {
 #define COPY(param) \
@@ -198,6 +169,35 @@ cpio_header_from_record(struct cpio_header *restrict head, const struct cpio_rec
 	COPY(filesize);
 #undef COPY
 	memcpy(head->c_magic, MAGIC, sizeof(head->c_magic));
+	return 0;
+}
+
+int
+cpio_record_set_filename(struct cpio_record *rec, const char *name)
+{
+	if (rec == NULL || name == NULL)
+		ERETURN(E_NULL);
+
+	size_t len;
+	if ((len = strlen(name) + 1) > 0777777)	// +1 for the NUL byte
+		ERETURN(EOVERFLOW);
+
+	/*
+	 * POSIX-1.2017 says -
+	 *
+	 * 	All characters shall be represented in the ISO/IEC 646:1991 standard
+	 * 	IRV. For maximum portability between implementations, names should be
+	 * 	selected from characters represented by the portable filename character
+	 * 	set as octets with the most significant bit zero.
+	 *
+	 * So, we reject any names with the MSB set.
+	 */
+	for (int i = 0; i < strlen(name); i++)
+		if (name[i] >> 7)
+			ERETURN(E_NAME);
+
+	rec->namesize = len;
+	memcpy(rec->filename, name, len);
 	return 0;
 }
 
