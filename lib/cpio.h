@@ -50,6 +50,9 @@ struct cpio_record {
 	 */
 };
 struct cpio_entry {
+	/*
+	 * TODO: Doesn't support symbolic links
+	 */
 	struct cpio_record *rec;
 	FILE *fp;
 };

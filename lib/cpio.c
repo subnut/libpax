@@ -55,6 +55,9 @@ cpio_write_trailer(FILE *fp)
 int
 cpio_write_file(const char *fname, FILE *fp, size_t iobufsz)
 {
+	/*
+	 * TODO: Doesn't support symbolic links
+	 */
 	if (fname == NULL || fp == NULL)
 		ERETURN(E_NULL);
 
@@ -111,6 +114,9 @@ fail:	funlockfile(fp); return -1;
 int
 cpio_write_entry(const struct cpio_entry *ent, FILE *fp, size_t iobufsz)
 {
+	/*
+	 * TODO: Doesn't support symbolic links
+	 */
 	if (iobufsz < 1)
 		ERETURN(EINVAL);
 
@@ -198,6 +204,28 @@ cpio_header_from_record(struct cpio_header *restrict head, const struct cpio_rec
 void
 cpio_record_set_stat(struct cpio_record *rec, const struct stat *stat)
 {
+	/*
+	 * TODO: This isn't how dev/ino/nlink/rdev work.
+	 *
+	 * - c_nlink doesn't match with st_nlink.
+	 *   c_nlink denotes the number of times this file is included in this archive.
+	 *   st_nlink denotes the number hard-links that point to this file.
+	 *
+	 * - rdev is supposed to be implementation-defined.
+	 *   We're just gonna set it to 0 while creating an archive,
+	 *   and are gonna ignore it while reading an archive.
+	 *
+	 * - dev and ino don't denote the _actual_ device and inode of the file.
+	 *   They are used to just distinguish between files.
+	 */
+	/*
+	 * TODO: Add error handling in case the st_* values are larger than
+	 *       what their c_* counterparts can handle. (eg. an inode value
+	 *       greater than UINT32_MAX shall cause c_ino to overflow)
+	 *
+	 *       What should we do when that happens?
+	 *       Should we skip that file entirely?
+	 */
 #define COPY(param) \
 	rec->param = stat->st_##param
 	COPY(dev);
