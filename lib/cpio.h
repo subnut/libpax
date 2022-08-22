@@ -52,6 +52,7 @@ struct cpio_record {
 struct cpio_entry {
 	/*
 	 * TODO: Doesn't support symbolic links
+	 * TIP: Use union { FILE *, char * }
 	 */
 	struct cpio_record *rec;
 	FILE *fp;

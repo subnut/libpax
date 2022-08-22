@@ -57,6 +57,7 @@ cpio_write_file(const char *fname, FILE *fp, size_t iobufsz)
 {
 	/*
 	 * TODO: Doesn't support symbolic links
+	 * TIP: Use readlink()
 	 */
 	if (fname == NULL || fp == NULL)
 		ERETURN(E_NULL);
@@ -116,6 +117,7 @@ cpio_write_entry(const struct cpio_entry *ent, FILE *fp, size_t iobufsz)
 {
 	/*
 	 * TODO: Doesn't support symbolic links
+	 * TIP: Use readlink()
 	 */
 	if (iobufsz < 1)
 		ERETURN(EINVAL);
