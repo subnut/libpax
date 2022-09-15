@@ -11,7 +11,7 @@
 void libpax_perror(const char *);
 const char *libpax_strerror(int);
 enum {
-	E__MAX = SCHAR_MIN,	// SCHAR_MIN = -128
+	_E__MAX = SCHAR_MIN,	// SCHAR_MIN = -128
 	E_NULL,
 	E_NAME,
 };

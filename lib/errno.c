@@ -29,5 +29,5 @@ const char *
 libpax_strerror(int errnum)
 {
 	if (errnum > -1) return strerror(errnum);
-	else             return errno_desc[errnum - E__MAX];
+	else             return errno_desc[errnum - _E__MAX];
 }
